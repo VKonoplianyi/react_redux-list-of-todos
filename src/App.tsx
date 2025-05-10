@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 
@@ -7,18 +7,24 @@ import { TodoList } from './components/TodoList';
 import { TodoFilter } from './components/TodoFilter';
 import { TodoModal } from './components/TodoModal';
 import { Loader } from './components/Loader';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from './app/store';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from './app/store';
 import { setTodos } from './features/todos';
 
 export const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const todos = useSelector((state: RootState) => state.todos);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    getTodos().then(fetchedTodos => {
-      dispatch(setTodos(fetchedTodos));
-    });
+    setIsLoading(true);
+
+    getTodos()
+      .then(fetchedTodos => {
+        dispatch(setTodos(fetchedTodos));
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [dispatch]);
 
   return (
@@ -32,9 +38,7 @@ export const App: React.FC = () => {
               <TodoFilter />
             </div>
 
-            <div className="block">
-              {!todos.length ? <Loader /> : <TodoList />}
-            </div>
+            <div className="block">{isLoading ? <Loader /> : <TodoList />}</div>
           </div>
         </div>
       </div>
